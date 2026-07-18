@@ -138,6 +138,12 @@ RUN huggingface-cli download Comfy-Org/Wan_2.2_ComfyUI_Repackaged split_files/di
 RUN huggingface-cli download Comfy-Org/Wan_2.2_ComfyUI_Repackaged split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors --local-dir . --local-dir-use-symlinks False \
     && mv split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors models/unet/ \
     && rm -rf split_files
+
+RUN git clone https://github.com/dewittethomas/comfyui-Base64-Nodes comfyui/custom_nodes/comfyui-Base64-Nodes
+RUN git clone https://github.com/Kosinkadink/comfyui-VideoHelperSuite comfyui/custom_nodes/comfyui-VideoHelperSuite
+
+RUN uv pip install -r comfyui/custom_nodes/comfyui-Base64-Nodes/requirements.txt
+RUN uv pip install -r comfyui/custom_nodes/comfyui-VideoHelperSuite/requirements.txt
     
 # Stage 3: Final image
 FROM base AS final
