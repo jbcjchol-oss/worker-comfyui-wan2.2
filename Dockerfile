@@ -131,9 +131,14 @@ WORKDIR /comfyui
 RUN mkdir -p models/checkpoints models/unet models/vae models/unet models/clip models/text_encoders models/diffusion_models models/model_patches
 
 # Download checkpoints/vae/unet/clip models to include in image based on model type
-RUN wget -O /comfyui/models/unet/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
-RUN wget -O /ComfyUI/models/unet/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors"
+RUN huggingface-cli download Comfy-Org/Wan_2.2_ComfyUI_Repackaged split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors --local-dir . --local-dir-use-symlinks False \
+    && mv split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors models/unet/ \
+    && rm -rf split_files
 
+RUN huggingface-cli download Comfy-Org/Wan_2.2_ComfyUI_Repackaged split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors --local-dir . --local-dir-use-symlinks False \
+    && mv split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors models/unet/ \
+    && rm -rf split_files
+    
 # Stage 3: Final image
 FROM base AS final
 
