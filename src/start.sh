@@ -15,7 +15,7 @@ if [ -n "$PUBLIC_KEY" ]; then
         fi
     done
 
-    service ssh start && echo "worker-comfyui: SSH server started" || echo "worker-comfyui: SSH server could not be started" >&2
+    service ssh start && echo "worker-ComfyUI: SSH server started" || echo "worker-ComfyUI: SSH server could not be started" >&2
 fi
 
 # Use libtcmalloc for better memory management
@@ -28,7 +28,7 @@ export LD_PRELOAD="${TCMALLOC}"
 # cannot initialize CUDA the worker will never be able to process jobs,
 # so we fail fast with an actionable error message.
 # ---------------------------------------------------------------------------
-echo "worker-comfyui: Checking GPU availability..."
+echo "worker-ComfyUI: Checking GPU availability..."
 if ! GPU_CHECK=$(python3 -c "
 import torch
 try:
@@ -47,37 +47,37 @@ except Exception as e:
     print(f'FAIL: {e}')
     exit(1)
 " 2>&1); then
-    echo "worker-comfyui: GPU is not available or incompatible with this PyTorch build:"
-    echo "worker-comfyui: $GPU_CHECK"
-    echo "worker-comfyui: A 'no kernel image is available' error means this torch build"
-    echo "worker-comfyui: lacks kernels for this GPU. Otherwise the GPU may not be"
-    echo "worker-comfyui: properly initialized — please contact RunPod support."
+    echo "worker-ComfyUI: GPU is not available or incompatible with this PyTorch build:"
+    echo "worker-ComfyUI: $GPU_CHECK"
+    echo "worker-ComfyUI: A 'no kernel image is available' error means this torch build"
+    echo "worker-ComfyUI: lacks kernels for this GPU. Otherwise the GPU may not be"
+    echo "worker-ComfyUI: properly initialized — please contact RunPod support."
     exit 1
 fi
-echo "worker-comfyui: GPU available — $GPU_CHECK"
+echo "worker-ComfyUI: GPU available — $GPU_CHECK"
 
 # Ensure ComfyUI-Manager runs in offline network mode inside the container
-comfy-manager-set-mode offline || echo "worker-comfyui - Could not set ComfyUI-Manager network_mode" >&2
+comfy-manager-set-mode offline || echo "worker-ComfyUI - Could not set ComfyUI-Manager network_mode" >&2
 
-echo "worker-comfyui: Starting ComfyUI"
+echo "worker-ComfyUI: Starting ComfyUI"
 
 # Allow operators to tweak verbosity; default is DEBUG.
 : "${COMFY_LOG_LEVEL:=DEBUG}"
 
 # PID file used by the handler to detect if ComfyUI is still running
-COMFY_PID_FILE="/tmp/comfyui.pid"
+COMFY_PID_FILE="/tmp/ComfyUI.pid"
 
 # Serve the API and don't shutdown the container
 if [ "$SERVE_API_LOCALLY" == "true" ]; then
-    python -u /comfyui/main.py --disable-auto-launch --disable-metadata --listen --verbose "${COMFY_LOG_LEVEL}" --log-stdout &
+    python -u /ComfyUI/main.py --disable-auto-launch --disable-metadata --listen --verbose "${COMFY_LOG_LEVEL}" --log-stdout &
     echo $! > "$COMFY_PID_FILE"
 
-    echo "worker-comfyui: Starting RunPod Handler"
+    echo "worker-ComfyUI: Starting RunPod Handler"
     python -u /handler.py --rp_serve_api --rp_api_host=0.0.0.0
 else
-    python -u /comfyui/main.py --disable-auto-launch --disable-metadata --verbose "${COMFY_LOG_LEVEL}" --log-stdout &
+    python -u /ComfyUI/main.py --disable-auto-launch --disable-metadata --verbose "${COMFY_LOG_LEVEL}" --log-stdout &
     echo $! > "$COMFY_PID_FILE"
 
-    echo "worker-comfyui: Starting RunPod Handler"
+    echo "worker-ComfyUI: Starting RunPod Handler"
     python -u /handler.py
 fi
